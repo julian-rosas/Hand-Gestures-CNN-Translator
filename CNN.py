@@ -19,10 +19,10 @@ Date: 29 May 2025
 import numpy as np
 import pandas as pd
 import numba as nb
-from sklearn.utils import shuffle
+from numba import njit, prange
 
 
-@nb.jit(nopython=True)
+@njit(parallel=True)
 def max_pool_2d(feature_maps, pool_size, stride):
     """
     Performs 2D max pooling operation on feature maps.
@@ -41,7 +41,7 @@ def max_pool_2d(feature_maps, pool_size, stride):
     
     pooled_output = np.zeros((num_channels, pooled_height, pooled_width))
     
-    for channel_idx in range(num_channels):
+    for channel_idx in prange(num_channels):
         for row_idx in range(0, height, stride):
             for col_idx in range(0, width, stride):
                 pooled_output[channel_idx, row_idx//stride, col_idx//stride] = np.max(
@@ -50,7 +50,7 @@ def max_pool_2d(feature_maps, pool_size, stride):
     return pooled_output
 
 
-@nb.jit(nopython=True)
+@njit(parallel = True)
 def relu_activation(input_tensor):
     """
     ReLU (Rectified Linear Unit) activation function.
@@ -64,7 +64,7 @@ def relu_activation(input_tensor):
     return input_tensor * (input_tensor > 0)
 
 
-@nb.jit(nopython=True)
+@njit(parallel = True)
 def relu_derivative(input_tensor):
     """
     Derivative of ReLU activation function.
@@ -100,7 +100,7 @@ def softmax_cross_entropy_loss(network_output, true_label):
     return cross_entropy_loss, probabilities
 
 
-@nb.jit(nopython=True)
+@njit(parallel=True)
 def forward(input_image, network_parameters, layer_dimensions):
     """
     Performs forward propagation through the CNN.
@@ -121,7 +121,7 @@ def forward(input_image, network_parameters, layer_dimensions):
     conv2_output = np.zeros((conv2_channels, conv2_size, conv2_size))
 
     # Convolution operation for first layer
-    for filter_idx in range(conv1_channels):
+    for filter_idx in prange(conv1_channels):
         for row_idx in range(conv1_size):
             for col_idx in range(conv1_size):
                 conv1_output[filter_idx, row_idx, col_idx] = (
@@ -131,7 +131,7 @@ def forward(input_image, network_parameters, layer_dimensions):
     conv1_output = relu_activation(conv1_output)
 
     # Second convolutional layer
-    for filter_idx in range(conv2_channels):
+    for filter_idx in prange(conv2_channels):
         for row_idx in range(conv2_size):
             for col_idx in range(conv2_size):
                 conv2_output[filter_idx, row_idx, col_idx] = (
@@ -186,7 +186,7 @@ def get_max_pool_indices(conv2_features, layer_dimensions):
     return max_indices
 
 
-@nb.jit(nopython=True)
+@njit(parallel = True)
 def initialize_gradients(layer_dimensions):
     """
     Initializes gradient arrays for backpropagation.
@@ -211,7 +211,7 @@ def initialize_gradients(layer_dimensions):
     return grad_conv1, grad_conv2, grad_filter1, grad_filter2, grad_bias1, grad_bias2
 
 
-@nb.jit(nopython=True)
+@njit
 def backward(input_image, true_label, network_parameters, forward_activations, 
                         softmax_probabilities, max_pool_indices, layer_dimensions):
     """

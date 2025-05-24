@@ -274,7 +274,7 @@ def evaluate_model_accuracy(X_test, y_test, trained_parameters, layer_dimensions
         y_test (np.ndarray): Test labels
         trained_parameters (tuple): Trained network parameters
         layer_dimensions (tuple): Layer dimension specifications
-        label_template (np.ndarray): Template for one-hot encoding (unused in current implementation)
+        label_template (np.ndarray): Template for one-hot encoding 
     """
     print("Evaluating model on test set...")
     
