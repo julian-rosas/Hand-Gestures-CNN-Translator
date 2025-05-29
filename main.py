@@ -11,6 +11,7 @@ The script expects CSV files in ./input/train/ and ./input/test/ directories.
 """
 
 import numpy as np
+import time
 import pandas as pd
 import numba as nb
 from sklearn.utils import shuffle
@@ -313,6 +314,8 @@ def main():
     3. Visualizes training progress
     4. Evaluates model performance on test set
     """
+
+    start_time = time.time()
     print("=" * 80)
     print("CNN SIGN LANGUAGE DIGIT RECOGNITION")
     print("=" * 80)
@@ -337,12 +340,17 @@ def main():
     print()
     final_accuracy = evaluate_model_accuracy(X_test, y_test, trained_parameters, layer_dimensions, label_template)
     
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
     print("\n" + "=" * 80)
     print("TRAINING SUMMARY")
     print("=" * 80)
     print(f"Final Test Accuracy: {final_accuracy:.2f}%")
     print(f"Total Training Epochs: {len(training_costs)}")
     print(f"Final Training Cost: {training_costs[-1]:.4f}")
+    print(f"Total execution Time: {elapsed_time:.2f} seconds")
     print("=" * 80)
 
 
